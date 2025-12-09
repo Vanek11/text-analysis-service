@@ -6,6 +6,10 @@ import GrammarSummary from './GrammarSummary';
 import ParticiplesTab from './ParticiplesTab';
 import AdverbsTab from './AdverbsTab';
 import VerbsTab from './VerbsTab';
+import AdjectivesTab from './AdjectivesTab';
+import GrammarConstructionsTab from './GrammarConstructionsTab';
+import PrepositionsTab from './PrepositionsTab';
+import ComplexityAnalysisTab from './ComplexityAnalysisTab';
 import StatisticsTab from './StatisticsTab';
 import GrammarCheckTab from './GrammarCheckTab';
 import './AnalysisResults.css';
@@ -21,6 +25,9 @@ function AnalysisResults({ results }) {
   const participlesCount = results.tokens?.filter(t => t.participle).length || 0;
   const adverbsCount = results.tokens?.filter(t => t.adverb_classification).length || 0;
   const verbsCount = results.tokens?.filter(t => t.pos === 'VERB').length || 0;
+  const adjectivesCount = results.tokens?.filter(t => t.adjective_analysis).length || 0;
+  const prepositionsCount = results.tokens?.filter(t => t.preposition_analysis).length || 0;
+  const grammarConstructionsCount = results.grammar_constructions?.length || 0;
   const grammarErrorsCount = results.grammar_errors?.length || 0;
 
   return (
@@ -70,12 +77,44 @@ function AnalysisResults({ results }) {
             {t('verbs')} ({verbsCount})
           </button>
         )}
+        {adjectivesCount > 0 && (
+          <button
+            className={activeTab === 'adjectives' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('adjectives')}
+          >
+            {t('adjectives')} ({adjectivesCount})
+          </button>
+        )}
+        {prepositionsCount > 0 && (
+          <button
+            className={activeTab === 'prepositions' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('prepositions')}
+          >
+            {t('prepositions')} ({prepositionsCount})
+          </button>
+        )}
+        {grammarConstructionsCount > 0 && (
+          <button
+            className={activeTab === 'grammarConstructions' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('grammarConstructions')}
+          >
+            {t('grammarConstructions')} ({grammarConstructionsCount})
+          </button>
+        )}
         {results.statistics && (
           <button
             className={activeTab === 'statistics' ? 'tab active' : 'tab'}
             onClick={() => setActiveTab('statistics')}
           >
             {t('statistics')}
+          </button>
+        )}
+        {results.complexity_metrics && (
+          <button
+            className={activeTab === 'complexity' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('complexity')}
+          >
+            {t('complexityAnalysis')}
           </button>
         )}
         <button
@@ -101,10 +140,28 @@ function AnalysisResults({ results }) {
         {activeTab === 'participles' && <ParticiplesTab tokens={results.tokens} />}
         {activeTab === 'adverbs' && <AdverbsTab tokens={results.tokens} />}
         {activeTab === 'verbs' && <VerbsTab tokens={results.tokens} />}
+        {activeTab === 'adjectives' && <AdjectivesTab tokens={results.tokens} />}
+        {activeTab === 'prepositions' && (
+          <PrepositionsTab 
+            tokens={results.tokens}
+            nestedPrepositionalPhrases={results.nested_prepositional_phrases}
+          />
+        )}
+        {activeTab === 'grammarConstructions' && (
+          <GrammarConstructionsTab 
+            grammarConstructions={results.grammar_constructions}
+            sentences={results.sentences}
+          />
+        )}
         {activeTab === 'statistics' && (
           <StatisticsTab 
             tokens={results.tokens} 
             statistics={results.statistics}
+          />
+        )}
+        {activeTab === 'complexity' && (
+          <ComplexityAnalysisTab 
+            complexityMetrics={results.complexity_metrics}
           />
         )}
         {activeTab === 'grammarCheck' && (

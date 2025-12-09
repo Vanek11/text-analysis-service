@@ -116,6 +116,26 @@
   color: #999;
 }
 
+.word-cloud-card {
+  grid-column: 1 / -1;
+}
+
+.word-cloud-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 1rem;
+}
+
+.timeline-card {
+  grid-column: 1 / -1;
+}
+
+.nouns {
+  color: #2ecc71;
+}
+
 @media (max-width: 768px) {
   .statistics-grid {
     grid-template-columns: 1fr;

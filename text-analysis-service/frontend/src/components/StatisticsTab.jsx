@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import WordCloud from 'react-wordcloud';
 import './StatisticsTab.css';
 
 function StatisticsTab({ tokens, statistics }) {
@@ -35,6 +36,71 @@ function StatisticsTab({ tokens, statistics }) {
       count,
       intensity: Math.min(count / sorted[0][1], 1)
     }));
+  }, [statistics]);
+
+  // Word Cloud data
+  const wordCloudData = useMemo(() => {
+    if (!tokens) return [];
+    const wordFreq = {};
+    tokens.forEach(token => {
+      if (token.pos && !['PUNCT', 'SYM', 'SPACE'].includes(token.pos)) {
+        const word = token.text.toLowerCase();
+        wordFreq[word] = (wordFreq[word] || 0) + 1;
+      }
+    });
+    return Object.entries(wordFreq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 50)
+      .map(([text, value]) => ({ text, value }));
+  }, [tokens]);
+
+  // Timeline data (распределение по предложениям)
+  const timelineData = useMemo(() => {
+    if (!tokens || !statistics?.pos_distribution) return [];
+    // Группируем токены по предложениям (упрощенно - по позициям)
+    const sentences = [];
+    let currentSentence = [];
+    let sentenceIndex = 0;
+    
+    tokens.forEach((token, idx) => {
+      if (token.pos === 'PUNCT' && ['.', '!', '?'].includes(token.text)) {
+        if (currentSentence.length > 0) {
+          sentences.push({
+            sentence: sentenceIndex + 1,
+            wordCount: currentSentence.length,
+            verbCount: currentSentence.filter(t => t.pos === 'VERB').length,
+            nounCount: currentSentence.filter(t => t.pos === 'NOUN').length
+          });
+          sentenceIndex++;
+          currentSentence = [];
+        }
+      } else if (token.pos !== 'PUNCT' && token.pos !== 'SYM') {
+        currentSentence.push(token);
+      }
+    });
+    
+    if (currentSentence.length > 0) {
+      sentences.push({
+        sentence: sentenceIndex + 1,
+        wordCount: currentSentence.length,
+        verbCount: currentSentence.filter(t => t.pos === 'VERB').length,
+        nounCount: currentSentence.filter(t => t.pos === 'NOUN').length
+      });
+    }
+    
+    return sentences.slice(0, 20); // Ограничиваем 20 предложениями
+  }, [tokens, statistics]);
+
+  // Radar Chart data для POS распределения
+  const radarData = useMemo(() => {
+    if (!statistics?.pos_distribution) return [];
+    return Object.entries(statistics.pos_distribution)
+      .slice(0, 8)
+      .map(([name, value]) => ({
+        metric: name,
+        value: value,
+        fullMark: Math.max(...Object.values(statistics.pos_distribution))
+      }));
   }, [statistics]);
 
   if (!statistics) {
@@ -140,6 +206,67 @@ function StatisticsTab({ tokens, statistics }) {
             ))}
           </div>
         </div>
+
+        {/* Radar Chart */}
+        {radarData.length > 0 && (
+          <div className="stat-card">
+            <h4>{t('posRadarChart')}</h4>
+            <ResponsiveContainer width="100%" height={300}>
+              <RadarChart data={radarData}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="metric" />
+                <PolarRadiusAxis />
+                <Radar
+                  name={t('frequency')}
+                  dataKey="value"
+                  stroke="#4a90e2"
+                  fill="#4a90e2"
+                  fillOpacity={0.6}
+                />
+                <Tooltip />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Word Cloud */}
+        {wordCloudData.length > 0 && (
+          <div className="stat-card word-cloud-card">
+            <h4>{t('wordCloud')}</h4>
+            <div className="word-cloud-container">
+              <WordCloud
+                words={wordCloudData}
+                options={{
+                  rotations: 2,
+                  rotationSteps: 2,
+                  fontSizes: [12, 60],
+                  fontFamily: 'Arial, sans-serif',
+                  colors: ['#4a90e2', '#50c878', '#ff6b6b', '#ffa500', '#9b59b6']
+                }}
+                size={[600, 300]}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Timeline */}
+        {timelineData.length > 0 && (
+          <div className="stat-card timeline-card">
+            <h4>{t('sentenceTimeline')}</h4>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={timelineData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="sentence" label={{ value: t('sentence'), position: 'insideBottom', offset: -5 }} />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="wordCount" fill="#4a90e2" name={t('words')} />
+                <Bar dataKey="verbCount" fill="#e74c3c" name={t('verbs')} />
+                <Bar dataKey="nounCount" fill="#2ecc71" name={t('nouns')} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
 
         {/* Summary Statistics */}
         <div className="stat-card stat-summary">

@@ -12,6 +12,10 @@ from ..utils.participle_analyzer import analyze_participle
 from ..utils.verb_analyzer import analyze_verb_type
 from ..utils.adverb_classifier import classify_adverb
 from ..utils.grammar_checker import check_grammar
+from ..utils.adjective_analyzer import analyze_adjective
+from ..utils.grammar_constructions import analyze_grammar_constructions
+from ..utils.preposition_analyzer import analyze_preposition, find_nested_prepositional_phrases
+from ..utils.complexity_analyzer import calculate_complexity_metrics
 
 
 class TextAnalyzer:
@@ -55,12 +59,24 @@ class TextAnalyzer:
         # Проверка грамматики
         grammar_errors = check_grammar(doc, tokens)
         
+        # Анализ грамматических конструкций
+        grammar_constructions = analyze_grammar_constructions(doc, tokens)
+        
+        # Анализ вложенных предложных фраз
+        nested_prepositional_phrases = find_nested_prepositional_phrases(doc, tokens)
+        
+        # Метрики синтаксической сложности
+        complexity_metrics = calculate_complexity_metrics(doc, tokens, dependency_tree)
+        
         return {
             "tokens": tokens,
             "sentences": sentences,
             "dependency_tree": dependency_tree,
             "statistics": statistics,
-            "grammar_errors": grammar_errors
+            "grammar_errors": grammar_errors,
+            "grammar_constructions": grammar_constructions,
+            "nested_prepositional_phrases": nested_prepositional_phrases,
+            "complexity_metrics": complexity_metrics
         }
     
     def _extract_tokens(self, doc, options: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -106,6 +122,16 @@ class TextAnalyzer:
             if token.pos_ == "ADV":
                 adverb_classification = classify_adverb(token, doc)
             
+            # Анализ прилагательных
+            adjective_analysis = None
+            if token.pos_ == "ADJ":
+                adjective_analysis = analyze_adjective(token, doc)
+            
+            # Анализ предлогов
+            preposition_analysis = None
+            if token.pos_ == "ADP":
+                preposition_analysis = analyze_preposition(token, doc)
+            
             token_data = {
                 "id": i,
                 "text": token.text,
@@ -117,7 +143,9 @@ class TextAnalyzer:
                 "grammar": grammar,
                 "verb_type": verb_type,
                 "participle": participle,
-                "adverb_classification": adverb_classification
+                "adverb_classification": adverb_classification,
+                "adjective_analysis": adjective_analysis,
+                "preposition_analysis": preposition_analysis
             }
             
             tokens.append(token_data)
@@ -204,6 +232,18 @@ class TextAnalyzer:
             sem_type = adv.get("adverb_classification", {}).get("semantic", "unknown")
             adverb_semantic[sem_type] = adverb_semantic.get(sem_type, 0) + 1
         
+        # Подсчет прилагательных по типам и степеням
+        adjectives = [t for t in tokens if t.get("pos") == "ADJ"]
+        adjective_types = {}
+        adjective_degrees = {"positive": 0, "comparative": 0, "superlative": 0}
+        for adj in adjectives:
+            adj_analysis = adj.get("adjective_analysis")
+            if adj_analysis:
+                adj_type = adj_analysis.get("type", "unknown")
+                adjective_types[adj_type] = adjective_types.get(adj_type, 0) + 1
+                degree = adj_analysis.get("degree", {}).get("degree", "positive")
+                adjective_degrees[degree] = adjective_degrees.get(degree, 0) + 1
+        
         return {
             "pos_distribution": pos_counts,
             "participles": {
@@ -219,6 +259,43 @@ class TextAnalyzer:
             "adverbs": {
                 "total": len(adverbs),
                 "by_semantic": adverb_semantic
+            },
+            "adjectives": {
+                "total": len(adjectives),
+                "by_type": adjective_types,
+                "by_degree": adjective_degrees
             }
         }
+        
+        # Подсчет предлогов по типам
+        prepositions = [t for t in tokens if t.get("pos") == "ADP"]
+        preposition_types = {}
+        for prep in prepositions:
+            prep_analysis = prep.get("preposition_analysis")
+            if prep_analysis:
+                prep_type = prep_analysis.get("type", "unknown")
+                preposition_types[prep_type] = preposition_types.get(prep_type, 0) + 1
+        
+        result["prepositions"] = {
+            "total": len(prepositions),
+            "by_type": preposition_types
+        }
+        
+        return result
+        
+        # Подсчет предлогов по типам
+        prepositions = [t for t in tokens if t.get("pos") == "ADP"]
+        preposition_types = {}
+        for prep in prepositions:
+            prep_analysis = prep.get("preposition_analysis")
+            if prep_analysis:
+                prep_type = prep_analysis.get("type", "unknown")
+                preposition_types[prep_type] = preposition_types.get(prep_type, 0) + 1
+        
+        result["prepositions"] = {
+            "total": len(prepositions),
+            "by_type": preposition_types
+        }
+        
+        return result
 
