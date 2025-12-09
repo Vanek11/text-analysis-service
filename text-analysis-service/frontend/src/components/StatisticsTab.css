@@ -128,6 +128,27 @@
   padding: 1rem;
 }
 
+.word-cloud-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 300px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.word-cloud-item {
+  transition: transform 0.2s, opacity 0.2s;
+  user-select: none;
+}
+
+.word-cloud-item:hover {
+  transform: scale(1.1);
+  opacity: 1 !important;
+}
+
 .timeline-card {
   grid-column: 1 / -1;
 }

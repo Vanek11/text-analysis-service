@@ -1,8 +1,49 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
-import WordCloud from 'react-wordcloud';
 import './StatisticsTab.css';
+
+// Простой компонент Word Cloud
+function WordCloudComponent({ words }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current || words.length === 0) return;
+
+    const container = containerRef.current;
+    container.innerHTML = '';
+
+    // Сортируем слова по частоте (самые частые сначала)
+    const sortedWords = [...words].sort((a, b) => b.value - a.value).slice(0, 50);
+    
+    if (sortedWords.length === 0) return;
+
+    const maxValue = Math.max(...sortedWords.map(w => w.value));
+    const minValue = Math.min(...sortedWords.map(w => w.value));
+    const valueRange = maxValue - minValue || 1; // Избегаем деления на ноль
+
+    sortedWords.forEach((word, index) => {
+      const span = document.createElement('span');
+      const fontSize = 12 + ((word.value - minValue) / valueRange) * 48;
+      const colors = ['#4a90e2', '#50c878', '#ff6b6b', '#ffa500', '#9b59b6', '#1abc9c', '#e74c3c', '#3498db'];
+      
+      span.textContent = word.text;
+      span.className = 'word-cloud-item';
+      span.style.fontSize = `${fontSize}px`;
+      span.style.color = colors[index % colors.length];
+      span.style.fontWeight = word.value > maxValue * 0.5 ? '600' : '400';
+      span.style.opacity = 0.7 + (word.value / maxValue) * 0.3;
+      span.style.margin = '4px 8px';
+      span.style.display = 'inline-block';
+      span.style.cursor = 'pointer';
+      span.title = `${word.text}: ${word.value} occurrences`;
+      
+      container.appendChild(span);
+    });
+  }, [words]);
+
+  return <div ref={containerRef} className="word-cloud-wrapper" />;
+}
 
 function StatisticsTab({ tokens, statistics }) {
   const { t } = useLanguage();
@@ -234,17 +275,7 @@ function StatisticsTab({ tokens, statistics }) {
           <div className="stat-card word-cloud-card">
             <h4>{t('wordCloud')}</h4>
             <div className="word-cloud-container">
-              <WordCloud
-                words={wordCloudData}
-                options={{
-                  rotations: 2,
-                  rotationSteps: 2,
-                  fontSizes: [12, 60],
-                  fontFamily: 'Arial, sans-serif',
-                  colors: ['#4a90e2', '#50c878', '#ff6b6b', '#ffa500', '#9b59b6']
-                }}
-                size={[600, 300]}
-              />
+              <WordCloudComponent words={wordCloudData} />
             </div>
           </div>
         )}
