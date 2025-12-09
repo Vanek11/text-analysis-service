@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import TokenTable from './TokenTable';
 import DependencyTree from './DependencyTree';
 import GrammarSummary from './GrammarSummary';
 import './AnalysisResults.css';
 
 function AnalysisResults({ results }) {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('tokens');
 
   if (!results) {
@@ -13,26 +15,26 @@ function AnalysisResults({ results }) {
 
   return (
     <div className="analysis-results">
-      <h2>Analysis Results</h2>
+      <h2>{t('analysisResults')}</h2>
       
       <div className="results-tabs">
         <button
           className={activeTab === 'tokens' ? 'tab active' : 'tab'}
           onClick={() => setActiveTab('tokens')}
         >
-          Tokens ({results.tokens?.length || 0})
+          {t('tokens')} ({results.tokens?.length || 0})
         </button>
         <button
           className={activeTab === 'tree' ? 'tab active' : 'tab'}
           onClick={() => setActiveTab('tree')}
         >
-          Dependency Tree
+          {t('dependencyTree')}
         </button>
         <button
           className={activeTab === 'grammar' ? 'tab active' : 'tab'}
           onClick={() => setActiveTab('grammar')}
         >
-          Grammar Summary
+          {t('grammarSummary')}
         </button>
       </div>
 

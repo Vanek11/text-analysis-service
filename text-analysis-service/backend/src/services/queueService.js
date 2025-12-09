@@ -1,4 +1,4 @@
-import { Queue } from 'bull';
+import Bull from 'bull';
 import { nlpService } from './nlpService.js';
 import { cacheService } from './cacheService.js';
 import { logger } from '../utils/logger.js';
@@ -7,7 +7,7 @@ const REDIS_HOST = process.env.REDIS_HOST || 'localhost';
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 
 // Создание очереди для асинхронной обработки
-export const analysisQueue = new Queue('text-analysis', {
+export const analysisQueue = new Bull('text-analysis', {
   redis: {
     host: REDIS_HOST,
     port: REDIS_PORT

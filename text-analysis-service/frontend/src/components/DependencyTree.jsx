@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import * as d3 from 'd3';
 import './DependencyTree.css';
 
 function DependencyTree({ tree, tokens }) {
+  const { t } = useLanguage();
   const [viewMode, setViewMode] = useState('interactive'); // 'interactive' or 'static'
   const svgRef = useRef(null);
   const containerRef = useRef(null);
@@ -184,7 +186,7 @@ function DependencyTree({ tree, tokens }) {
   };
 
   if (!tree || !tree.nodes || tree.nodes.length === 0) {
-    return <div className="dependency-tree-empty">No dependency tree data available</div>;
+    return <div className="dependency-tree-empty">{t('noTreeData')}</div>;
   }
 
   return (
@@ -194,13 +196,13 @@ function DependencyTree({ tree, tokens }) {
           className={viewMode === 'interactive' ? 'control-btn active' : 'control-btn'}
           onClick={() => setViewMode('interactive')}
         >
-          Interactive View
+          {t('interactiveView')}
         </button>
         <button
           className={viewMode === 'static' ? 'control-btn active' : 'control-btn'}
           onClick={() => setViewMode('static')}
         >
-          Static View
+          {t('staticView')}
         </button>
       </div>
 
@@ -213,7 +215,7 @@ function DependencyTree({ tree, tokens }) {
       </div>
 
       <div className="tree-legend">
-        <h4>Legend</h4>
+        <h4>{t('legend')}</h4>
         <div className="legend-items">
           {['NOUN', 'VERB', 'ADJ', 'ADV', 'PRON', 'DET', 'ADP', 'CONJ'].map(pos => (
             <div key={pos} className="legend-item">

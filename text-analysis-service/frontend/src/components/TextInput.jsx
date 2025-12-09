@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './TextInput.css';
 
 function TextInput({ text, onTextChange, onAnalyze, loading }) {
+  const { t } = useLanguage();
   const [options, setOptions] = useState({
     include_morphology: true,
     include_entities: false
@@ -26,11 +28,11 @@ function TextInput({ text, onTextChange, onAnalyze, loading }) {
     <form onSubmit={handleSubmit} className="text-input-form">
       <div className="text-input-header">
         <label htmlFor="text-input">
-          <strong>Enter English text to analyze:</strong>
+          <strong>{t('enterText')}</strong>
         </label>
         <div className="text-input-stats">
           <span className={isOverLimit ? 'text-over-limit' : ''}>
-            {textLength.toLocaleString()} / {maxLength.toLocaleString()} characters
+            {textLength.toLocaleString()} / {maxLength.toLocaleString()} {t('characters')}
           </span>
         </div>
       </div>
@@ -40,7 +42,7 @@ function TextInput({ text, onTextChange, onAnalyze, loading }) {
         className="text-input-area"
         value={text}
         onChange={(e) => onTextChange(e.target.value)}
-        placeholder="Enter your English text here..."
+        placeholder={t('placeholder')}
         rows={10}
         disabled={loading}
       />
@@ -53,7 +55,7 @@ function TextInput({ text, onTextChange, onAnalyze, loading }) {
             onChange={(e) => setOptions({ ...options, include_morphology: e.target.checked })}
             disabled={loading}
           />
-          Include morphology
+          {t('includeMorphology')}
         </label>
         <label>
           <input
@@ -62,7 +64,7 @@ function TextInput({ text, onTextChange, onAnalyze, loading }) {
             onChange={(e) => setOptions({ ...options, include_entities: e.target.checked })}
             disabled={loading}
           />
-          Include named entities
+          {t('includeEntities')}
         </label>
       </div>
 
@@ -73,20 +75,20 @@ function TextInput({ text, onTextChange, onAnalyze, loading }) {
           disabled={loading || !text}
           className="btn btn-secondary"
         >
-          Clear
+          {t('clear')}
         </button>
         <button
           type="submit"
           disabled={loading || !text.trim() || isOverLimit}
           className="btn btn-primary"
         >
-          {loading ? 'Analyzing...' : 'Analyze Text'}
+          {loading ? t('analyzing') : t('analyzeText')}
         </button>
       </div>
 
       {isOverLimit && (
         <div className="text-input-warning">
-          Text exceeds maximum length. Please use the async endpoint for longer texts.
+          {t('textTooLong')}
         </div>
       )}
     </form>

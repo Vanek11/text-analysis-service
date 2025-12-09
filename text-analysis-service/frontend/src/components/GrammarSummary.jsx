@@ -1,9 +1,12 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './GrammarSummary.css';
 
 function GrammarSummary({ tokens }) {
+  const { t } = useLanguage();
+  
   if (!tokens || tokens.length === 0) {
-    return <div className="grammar-summary-empty">No grammar data available</div>;
+    return <div className="grammar-summary-empty">{t('noGrammarData')}</div>;
   }
 
   // Фильтрация глаголов с грамматической информацией
@@ -32,20 +35,22 @@ function GrammarSummary({ tokens }) {
     posStats[token.pos] = (posStats[token.pos] || 0) + 1;
   });
 
+  const verbText = verbs.length === 1 ? t('verb') : t('verbs');
+  
   return (
     <div className="grammar-summary">
       <div className="summary-section">
-        <h3>Verb Grammar Analysis</h3>
-        <p className="summary-count">Found {verbs.length} verb{verbs.length !== 1 ? 's' : ''} with grammar information</p>
+        <h3>{t('verbGrammarAnalysis')}</h3>
+        <p className="summary-count">{t('foundVerbs')} {verbs.length} {verbText} {t('withGrammarInfo')}</p>
         
         {verbs.length > 0 && (
           <div className="summary-grid">
             <div className="summary-card">
-              <h4>Tense Distribution</h4>
+              <h4>{t('tenseDistribution')}</h4>
               <ul>
                 {Object.entries(tenseStats).map(([tense, count]) => (
                   <li key={tense}>
-                    <span className="stat-label">{tense}:</span>
+                    <span className="stat-label">{t(tense)}:</span>
                     <span className="stat-value">{count}</span>
                   </li>
                 ))}
@@ -53,11 +58,11 @@ function GrammarSummary({ tokens }) {
             </div>
 
             <div className="summary-card">
-              <h4>Aspect Distribution</h4>
+              <h4>{t('aspectDistribution')}</h4>
               <ul>
                 {Object.entries(aspectStats).map(([aspect, count]) => (
                   <li key={aspect}>
-                    <span className="stat-label">{aspect}:</span>
+                    <span className="stat-label">{t(aspect)}:</span>
                     <span className="stat-value">{count}</span>
                   </li>
                 ))}
@@ -65,11 +70,11 @@ function GrammarSummary({ tokens }) {
             </div>
 
             <div className="summary-card">
-              <h4>Voice Distribution</h4>
+              <h4>{t('voiceDistribution')}</h4>
               <ul>
                 {Object.entries(voiceStats).map(([voice, count]) => (
                   <li key={voice}>
-                    <span className="stat-label">{voice}:</span>
+                    <span className="stat-label">{t(voice)}:</span>
                     <span className="stat-value">{count}</span>
                   </li>
                 ))}
@@ -80,7 +85,7 @@ function GrammarSummary({ tokens }) {
 
         {verbs.length > 0 && (
           <div className="verbs-list">
-            <h4>Verb Details</h4>
+            <h4>{t('verbDetails')}</h4>
             <div className="verbs-table">
               {verbs.map(verb => (
                 <div key={verb.id} className="verb-item">
@@ -88,13 +93,13 @@ function GrammarSummary({ tokens }) {
                   <span className="verb-lemma">({verb.lemma})</span>
                   <div className="verb-grammar">
                     {verb.grammar.tense && (
-                      <span className="grammar-badge tense">{verb.grammar.tense}</span>
+                      <span className="grammar-badge tense">{t(verb.grammar.tense)}</span>
                     )}
                     {verb.grammar.aspect && (
-                      <span className="grammar-badge aspect">{verb.grammar.aspect}</span>
+                      <span className="grammar-badge aspect">{t(verb.grammar.aspect)}</span>
                     )}
                     {verb.grammar.voice && (
-                      <span className="grammar-badge voice">{verb.grammar.voice}</span>
+                      <span className="grammar-badge voice">{t(verb.grammar.voice)}</span>
                     )}
                   </div>
                 </div>
@@ -105,7 +110,7 @@ function GrammarSummary({ tokens }) {
       </div>
 
       <div className="summary-section">
-        <h3>POS Tag Distribution</h3>
+        <h3>{t('posTagDistribution')}</h3>
         <div className="pos-distribution">
           {Object.entries(posStats)
             .sort((a, b) => b[1] - a[1])

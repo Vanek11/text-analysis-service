@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './TokenTable.css';
 
 // Цветовое кодирование POS-тегов
@@ -17,11 +18,12 @@ const POS_COLORS = {
 };
 
 function TokenTable({ tokens }) {
+  const { t } = useLanguage();
   const [filter, setFilter] = useState('');
   const [posFilter, setPosFilter] = useState('');
 
   if (!tokens || tokens.length === 0) {
-    return <div className="token-table-empty">No tokens to display</div>;
+    return <div className="token-table-empty">{t('noTokens')}</div>;
   }
 
   // Получение уникальных POS-тегов
@@ -43,7 +45,7 @@ function TokenTable({ tokens }) {
       <div className="token-table-filters">
         <input
           type="text"
-          placeholder="Search tokens..."
+          placeholder={t('searchTokens')}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="filter-input"
@@ -53,13 +55,13 @@ function TokenTable({ tokens }) {
           onChange={(e) => setPosFilter(e.target.value)}
           className="filter-select"
         >
-          <option value="">All POS tags</option>
+          <option value="">{t('allPosTags')}</option>
           {uniquePos.map(pos => (
             <option key={pos} value={pos}>{pos}</option>
           ))}
         </select>
         <span className="filter-count">
-          Showing {filteredTokens.length} of {tokens.length} tokens
+          {t('showing')} {filteredTokens.length} {t('of')} {tokens.length} {t('tokensCount')}
         </span>
       </div>
 
@@ -67,14 +69,14 @@ function TokenTable({ tokens }) {
         <table className="token-table-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Text</th>
-              <th>Lemma</th>
-              <th>POS</th>
-              <th>Tag</th>
-              <th>Dependency</th>
-              <th>Head</th>
-              <th>Grammar</th>
+              <th>{t('id')}</th>
+              <th>{t('text')}</th>
+              <th>{t('lemma')}</th>
+              <th>{t('pos')}</th>
+              <th>{t('tag')}</th>
+              <th>{t('dependency')}</th>
+              <th>{t('head')}</th>
+              <th>{t('grammar')}</th>
             </tr>
           </thead>
           <tbody>
@@ -101,9 +103,9 @@ function TokenTable({ tokens }) {
                 <td>
                   {token.grammar ? (
                     <div className="grammar-info">
-                      {token.grammar.tense && <span>T: {token.grammar.tense}</span>}
-                      {token.grammar.aspect && <span>A: {token.grammar.aspect}</span>}
-                      {token.grammar.voice && <span>V: {token.grammar.voice}</span>}
+                      {token.grammar.tense && <span>{t('tense')}: {t(token.grammar.tense)}</span>}
+                      {token.grammar.aspect && <span>{t('aspect')}: {t(token.grammar.aspect)}</span>}
+                      {token.grammar.voice && <span>{t('voice')}: {t(token.grammar.voice)}</span>}
                     </div>
                   ) : '-'}
                 </td>

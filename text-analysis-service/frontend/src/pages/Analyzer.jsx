@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import TextInput from '../components/TextInput';
 import AnalysisResults from '../components/AnalysisResults';
 import { analyzeText } from '../services/api';
 import './Analyzer.css';
 
 function Analyzer() {
+  const { t } = useLanguage();
   const [text, setText] = useState('');
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -19,7 +21,7 @@ function Analyzer() {
       const data = await analyzeText(inputText, options);
       setResults(data);
     } catch (err) {
-      setError(err.message || 'An error occurred during analysis');
+      setError(err.message || t('errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -36,7 +38,7 @@ function Analyzer() {
         />
         {error && (
           <div className="error-message">
-            <strong>Error:</strong> {error}
+            <strong>{t('error')}:</strong> {error}
           </div>
         )}
       </div>
