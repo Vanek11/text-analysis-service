@@ -14,7 +14,8 @@ COPY requirements.txt .
 # Установка Python зависимостей
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Загрузка spaCy модели (установка через pip, так как spacy download не работает в Docker)
+# Загрузка spaCy модели через pip (более надежный способ для Docker)
+# Используем wheel файл для совместимости с Python 3.10
 RUN pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 
 # Копирование кода приложения
