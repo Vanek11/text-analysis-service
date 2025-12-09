@@ -29,6 +29,28 @@ class Grammar(BaseModel):
     voice: Optional[str] = None
 
 
+class VerbType(BaseModel):
+    type: str  # regular, modal, auxiliary, phrasal
+    modal: Optional[Dict[str, Any]] = None
+    auxiliary: Optional[bool] = None
+    auxiliary_type: Optional[str] = None
+    phrasal: Optional[Dict[str, Any]] = None
+
+
+class Participle(BaseModel):
+    type: str  # present or past
+    form: str
+    base: str
+    roles: List[str]
+
+
+class AdverbClassification(BaseModel):
+    semantic: str  # manner, time, place, frequency, degree, sentence
+    morphological: str  # simple, derived, compound, phrasal
+    modifies: Optional[Dict[str, Any]] = None
+    position: str  # beginning, middle, end
+
+
 class Token(BaseModel):
     id: int
     text: str
@@ -38,6 +60,9 @@ class Token(BaseModel):
     morphology: Optional[Dict[str, Any]] = None
     dependency: Dependency
     grammar: Optional[Grammar] = None
+    verb_type: Optional[VerbType] = None
+    participle: Optional[Participle] = None
+    adverb_classification: Optional[AdverbClassification] = None
 
 
 class Sentence(BaseModel):
@@ -65,8 +90,16 @@ class DependencyTree(BaseModel):
     edges: List[DependencyEdge]
 
 
+class Statistics(BaseModel):
+    pos_distribution: Dict[str, int]
+    participles: Dict[str, int]
+    verbs: Dict[str, int]
+    adverbs: Dict[str, Any]
+
+
 class AnalysisResponse(BaseModel):
     tokens: List[Token]
     sentences: List[Sentence]
     dependency_tree: DependencyTree
+    statistics: Optional[Statistics] = None
 

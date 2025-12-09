@@ -8,6 +8,9 @@ from ..schemas.models import (
     Token, Sentence, DependencyTree, DependencyNode, DependencyEdge
 )
 from ..utils.grammar_analyzer import analyze_grammar
+from ..utils.participle_analyzer import analyze_participle
+from ..utils.verb_analyzer import analyze_verb_type
+from ..utils.adverb_classifier import classify_adverb
 
 
 class TextAnalyzer:
@@ -45,10 +48,14 @@ class TextAnalyzer:
         # Построение дерева зависимостей
         dependency_tree = self._build_dependency_tree(doc)
         
+        # Дополнительная статистика для версии 1.1.0
+        statistics = self._calculate_statistics(doc, tokens)
+        
         return {
             "tokens": tokens,
             "sentences": sentences,
-            "dependency_tree": dependency_tree
+            "dependency_tree": dependency_tree,
+            "statistics": statistics
         }
     
     def _extract_tokens(self, doc, options: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -79,6 +86,21 @@ class TextAnalyzer:
             # Грамматические характеристики (для глаголов)
             grammar = analyze_grammar(token, doc)
             
+            # Расширенный анализ глаголов
+            verb_type = None
+            if token.pos_ == "VERB":
+                verb_type = analyze_verb_type(token, doc)
+            
+            # Анализ причастий
+            participle = None
+            if token.tag_ in ["VBG", "VBN"]:
+                participle = analyze_participle(token, doc)
+            
+            # Классификация наречий
+            adverb_classification = None
+            if token.pos_ == "ADV":
+                adverb_classification = classify_adverb(token, doc)
+            
             token_data = {
                 "id": i,
                 "text": token.text,
@@ -87,7 +109,10 @@ class TextAnalyzer:
                 "tag": token.tag_,
                 "morphology": morphology,
                 "dependency": dependency,
-                "grammar": grammar
+                "grammar": grammar,
+                "verb_type": verb_type,
+                "participle": participle,
+                "adverb_classification": adverb_classification
             }
             
             tokens.append(token_data)
@@ -145,5 +170,50 @@ class TextAnalyzer:
             "root": root_id,
             "nodes": nodes,
             "edges": edges
+        }
+    
+    def _calculate_statistics(self, doc, tokens: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Вычисляет статистику для версии 1.1.0
+        """
+        # Подсчет частей речи
+        pos_counts = {}
+        for token in tokens:
+            pos = token.get("pos", "X")
+            pos_counts[pos] = pos_counts.get(pos, 0) + 1
+        
+        # Подсчет причастий
+        participles = [t for t in tokens if t.get("participle")]
+        present_participles = [p for p in participles if p.get("participle", {}).get("type") == "present"]
+        past_participles = [p for p in participles if p.get("participle", {}).get("type") == "past"]
+        
+        # Подсчет типов глаголов
+        verbs = [t for t in tokens if t.get("pos") == "VERB"]
+        modal_verbs = [v for v in verbs if v.get("verb_type", {}).get("type") == "modal"]
+        phrasal_verbs = [v for v in verbs if v.get("verb_type", {}).get("type") == "phrasal"]
+        
+        # Подсчет наречий по типам
+        adverbs = [t for t in tokens if t.get("pos") == "ADV"]
+        adverb_semantic = {}
+        for adv in adverbs:
+            sem_type = adv.get("adverb_classification", {}).get("semantic", "unknown")
+            adverb_semantic[sem_type] = adverb_semantic.get(sem_type, 0) + 1
+        
+        return {
+            "pos_distribution": pos_counts,
+            "participles": {
+                "total": len(participles),
+                "present": len(present_participles),
+                "past": len(past_participles)
+            },
+            "verbs": {
+                "total": len(verbs),
+                "modal": len(modal_verbs),
+                "phrasal": len(phrasal_verbs)
+            },
+            "adverbs": {
+                "total": len(adverbs),
+                "by_semantic": adverb_semantic
+            }
         }
 
