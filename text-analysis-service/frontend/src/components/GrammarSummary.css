@@ -1,0 +1,176 @@
+.grammar-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.summary-section h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.summary-count {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.summary-card h4 {
+  margin-bottom: 0.75rem;
+  color: #4a90e2;
+  font-size: 1rem;
+}
+
+.summary-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-card li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  text-transform: capitalize;
+  color: #666;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.verbs-list {
+  margin-top: 1rem;
+}
+
+.verbs-list h4 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.verbs-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.verb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.verb-text {
+  font-weight: 500;
+  color: #333;
+}
+
+.verb-lemma {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.verb-grammar {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.grammar-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.grammar-badge.tense {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.grammar-badge.aspect {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.grammar-badge.voice {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.pos-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pos-stat-item {
+  display: grid;
+  grid-template-columns: 100px 1fr 60px;
+  gap: 1rem;
+  align-items: center;
+}
+
+.pos-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.pos-bar-container {
+  height: 24px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pos-bar {
+  height: 100%;
+  background-color: #4a90e2;
+  transition: width 0.3s;
+}
+
+.pos-count {
+  text-align: right;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.grammar-summary-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+}
+
