@@ -6,6 +6,9 @@ import './DependencyTree.css';
 function DependencyTree({ tree, tokens }) {
   const { t } = useLanguage();
   const [viewMode, setViewMode] = useState('interactive'); // 'interactive' or 'static'
+  const [filteredPos, setFilteredPos] = useState([]); // Массив POS-тегов для фильтрации
+  const [filteredDeps, setFilteredDeps] = useState([]); // Массив зависимостей для фильтрации
+  const [showFilters, setShowFilters] = useState(false);
   const svgRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -13,7 +16,7 @@ function DependencyTree({ tree, tokens }) {
     if (viewMode === 'interactive' && tree && svgRef.current) {
       drawInteractiveTree();
     }
-  }, [tree, viewMode, tokens]);
+  }, [tree, viewMode, tokens, filteredPos, filteredDeps]);
 
   const drawInteractiveTree = () => {
     if (!tree || !tree.nodes || !tree.edges) return;
@@ -25,9 +28,35 @@ function DependencyTree({ tree, tokens }) {
     const height = 600;
     svg.attr('width', width).attr('height', height);
 
+    // Фильтрация узлов и связей
+    let filteredNodes = tree.nodes.map(n => ({ ...n }));
+    let filteredLinks = tree.edges.map(e => ({ ...e }));
+
+    // Фильтрация по POS-тегам
+    if (filteredPos.length > 0) {
+      const posSet = new Set(filteredPos);
+      filteredNodes = filteredNodes.filter(n => posSet.has(n.pos));
+      const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+      filteredLinks = filteredLinks.filter(l => 
+        filteredNodeIds.has(l.source) && filteredNodeIds.has(l.target)
+      );
+    }
+
+    // Фильтрация по типам зависимостей
+    if (filteredDeps.length > 0) {
+      const depSet = new Set(filteredDeps);
+      filteredLinks = filteredLinks.filter(l => depSet.has(l.relation));
+      const linkedNodeIds = new Set();
+      filteredLinks.forEach(l => {
+        linkedNodeIds.add(l.source);
+        linkedNodeIds.add(l.target);
+      });
+      filteredNodes = filteredNodes.filter(n => linkedNodeIds.has(n.id));
+    }
+
     // Копирование данных для D3 (D3 мутирует данные)
-    const nodes = tree.nodes.map(n => ({ ...n }));
-    const links = tree.edges.map(e => ({ ...e }));
+    const nodes = filteredNodes.map(n => ({ ...n }));
+    const links = filteredLinks.map(e => ({ ...e }));
 
     // Создание симуляции силы
     const simulation = d3.forceSimulation(nodes)
@@ -140,12 +169,36 @@ function DependencyTree({ tree, tokens }) {
   const renderStaticTree = () => {
     if (!tree || !tree.nodes || !tokens) return null;
 
+    // Фильтрация узлов и связей
+    let filteredNodes = tree.nodes;
+    let filteredEdges = tree.edges;
+
+    if (filteredPos.length > 0) {
+      const posSet = new Set(filteredPos);
+      filteredNodes = filteredNodes.filter(n => posSet.has(n.pos));
+      const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+      filteredEdges = filteredEdges.filter(e => 
+        filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
+      );
+    }
+
+    if (filteredDeps.length > 0) {
+      const depSet = new Set(filteredDeps);
+      filteredEdges = filteredEdges.filter(e => depSet.has(e.relation));
+      const linkedNodeIds = new Set();
+      filteredEdges.forEach(e => {
+        linkedNodeIds.add(e.source);
+        linkedNodeIds.add(e.target);
+      });
+      filteredNodes = filteredNodes.filter(n => linkedNodeIds.has(n.id));
+    }
+
     // Построение дерева от корня
     const rootId = tree.root;
-    const nodesMap = new Map(tree.nodes.map(n => [n.id, n]));
+    const nodesMap = new Map(filteredNodes.map(n => [n.id, n]));
     const edgesMap = new Map();
     
-    tree.edges.forEach(edge => {
+    filteredEdges.forEach(edge => {
       if (!edgesMap.has(edge.target)) {
         edgesMap.set(edge.target, []);
       }
@@ -156,7 +209,7 @@ function DependencyTree({ tree, tokens }) {
       const node = nodesMap.get(nodeId);
       if (!node) return null;
 
-      const children = tree.edges
+      const children = filteredEdges
         .filter(e => e.target === nodeId)
         .map(e => e.source);
 
@@ -189,22 +242,93 @@ function DependencyTree({ tree, tokens }) {
     return <div className="dependency-tree-empty">{t('noTreeData')}</div>;
   }
 
+  // Получаем уникальные POS-теги и зависимости
+  const availablePos = tree ? [...new Set(tree.nodes.map(n => n.pos))].sort() : [];
+  const availableDeps = tree ? [...new Set(tree.edges.map(e => e.relation))].sort() : [];
+
+  const togglePosFilter = (pos) => {
+    setFilteredPos(prev => 
+      prev.includes(pos) 
+        ? prev.filter(p => p !== pos)
+        : [...prev, pos]
+    );
+  };
+
+  const toggleDepFilter = (dep) => {
+    setFilteredDeps(prev => 
+      prev.includes(dep) 
+        ? prev.filter(d => d !== dep)
+        : [...prev, dep]
+    );
+  };
+
+  const clearFilters = () => {
+    setFilteredPos([]);
+    setFilteredDeps([]);
+  };
+
   return (
     <div className="dependency-tree">
       <div className="tree-controls">
+        <div className="view-controls">
+          <button
+            className={viewMode === 'interactive' ? 'control-btn active' : 'control-btn'}
+            onClick={() => setViewMode('interactive')}
+          >
+            {t('interactiveView')}
+          </button>
+          <button
+            className={viewMode === 'static' ? 'control-btn active' : 'control-btn'}
+            onClick={() => setViewMode('static')}
+          >
+            {t('staticView')}
+          </button>
+        </div>
         <button
-          className={viewMode === 'interactive' ? 'control-btn active' : 'control-btn'}
-          onClick={() => setViewMode('interactive')}
+          className="filter-toggle-btn"
+          onClick={() => setShowFilters(!showFilters)}
         >
-          {t('interactiveView')}
-        </button>
-        <button
-          className={viewMode === 'static' ? 'control-btn active' : 'control-btn'}
-          onClick={() => setViewMode('static')}
-        >
-          {t('staticView')}
+          {t('filters')} {showFilters ? '▼' : '▶'}
         </button>
       </div>
+
+      {showFilters && (
+        <div className="tree-filters">
+          <div className="filter-section">
+            <h4>{t('filterByPos')}</h4>
+            <div className="filter-chips">
+              {availablePos.map(pos => (
+                <button
+                  key={pos}
+                  className={`filter-chip ${filteredPos.includes(pos) ? 'active' : ''}`}
+                  onClick={() => togglePosFilter(pos)}
+                >
+                  {pos}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="filter-section">
+            <h4>{t('filterByDependency')}</h4>
+            <div className="filter-chips">
+              {availableDeps.map(dep => (
+                <button
+                  key={dep}
+                  className={`filter-chip ${filteredDeps.includes(dep) ? 'active' : ''}`}
+                  onClick={() => toggleDepFilter(dep)}
+                >
+                  {dep}
+                </button>
+              ))}
+            </div>
+          </div>
+          {(filteredPos.length > 0 || filteredDeps.length > 0) && (
+            <button className="clear-filters-btn" onClick={clearFilters}>
+              {t('clearFilters')}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="tree-view-container" ref={containerRef}>
         {viewMode === 'interactive' ? (

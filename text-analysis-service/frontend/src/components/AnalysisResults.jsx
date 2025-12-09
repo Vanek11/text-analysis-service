@@ -3,6 +3,11 @@ import { useLanguage } from '../context/LanguageContext';
 import TokenTable from './TokenTable';
 import DependencyTree from './DependencyTree';
 import GrammarSummary from './GrammarSummary';
+import ParticiplesTab from './ParticiplesTab';
+import AdverbsTab from './AdverbsTab';
+import VerbsTab from './VerbsTab';
+import StatisticsTab from './StatisticsTab';
+import GrammarCheckTab from './GrammarCheckTab';
 import './AnalysisResults.css';
 
 function AnalysisResults({ results }) {
@@ -12,6 +17,11 @@ function AnalysisResults({ results }) {
   if (!results) {
     return null;
   }
+
+  const participlesCount = results.tokens?.filter(t => t.participle).length || 0;
+  const adverbsCount = results.tokens?.filter(t => t.adverb_classification).length || 0;
+  const verbsCount = results.tokens?.filter(t => t.pos === 'VERB').length || 0;
+  const grammarErrorsCount = results.grammar_errors?.length || 0;
 
   return (
     <div className="analysis-results">
@@ -36,6 +46,47 @@ function AnalysisResults({ results }) {
         >
           {t('grammarSummary')}
         </button>
+        {participlesCount > 0 && (
+          <button
+            className={activeTab === 'participles' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('participles')}
+          >
+            {t('participles')} ({participlesCount})
+          </button>
+        )}
+        {adverbsCount > 0 && (
+          <button
+            className={activeTab === 'adverbs' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('adverbs')}
+          >
+            {t('adverbs')} ({adverbsCount})
+          </button>
+        )}
+        {verbsCount > 0 && (
+          <button
+            className={activeTab === 'verbs' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('verbs')}
+          >
+            {t('verbs')} ({verbsCount})
+          </button>
+        )}
+        {results.statistics && (
+          <button
+            className={activeTab === 'statistics' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('statistics')}
+          >
+            {t('statistics')}
+          </button>
+        )}
+        <button
+          className={activeTab === 'grammarCheck' ? 'tab active' : 'tab'}
+          onClick={() => setActiveTab('grammarCheck')}
+        >
+          {t('grammarCheck')}
+          {grammarErrorsCount > 0 && (
+            <span className="error-badge">{grammarErrorsCount}</span>
+          )}
+        </button>
       </div>
 
       <div className="results-content">
@@ -47,6 +98,22 @@ function AnalysisResults({ results }) {
           />
         )}
         {activeTab === 'grammar' && <GrammarSummary tokens={results.tokens} />}
+        {activeTab === 'participles' && <ParticiplesTab tokens={results.tokens} />}
+        {activeTab === 'adverbs' && <AdverbsTab tokens={results.tokens} />}
+        {activeTab === 'verbs' && <VerbsTab tokens={results.tokens} />}
+        {activeTab === 'statistics' && (
+          <StatisticsTab 
+            tokens={results.tokens} 
+            statistics={results.statistics}
+          />
+        )}
+        {activeTab === 'grammarCheck' && (
+          <GrammarCheckTab 
+            tokens={results.tokens}
+            grammarErrors={results.grammar_errors}
+            sentences={results.sentences}
+          />
+        )}
       </div>
     </div>
   );

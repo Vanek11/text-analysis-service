@@ -90,6 +90,16 @@ class DependencyTree(BaseModel):
     edges: List[DependencyEdge]
 
 
+class GrammarError(BaseModel):
+    type: str
+    severity: str  # error, warning
+    message: str
+    token_id: Optional[int] = None
+    subject_id: Optional[int] = None
+    sentence: Optional[str] = None
+    suggestion: Optional[str] = None
+
+
 class Statistics(BaseModel):
     pos_distribution: Dict[str, int]
     participles: Dict[str, int]
@@ -102,4 +112,5 @@ class AnalysisResponse(BaseModel):
     sentences: List[Sentence]
     dependency_tree: DependencyTree
     statistics: Optional[Statistics] = None
+    grammar_errors: Optional[List[GrammarError]] = None
 

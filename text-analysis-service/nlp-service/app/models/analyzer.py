@@ -11,6 +11,7 @@ from ..utils.grammar_analyzer import analyze_grammar
 from ..utils.participle_analyzer import analyze_participle
 from ..utils.verb_analyzer import analyze_verb_type
 from ..utils.adverb_classifier import classify_adverb
+from ..utils.grammar_checker import check_grammar
 
 
 class TextAnalyzer:
@@ -51,11 +52,15 @@ class TextAnalyzer:
         # Дополнительная статистика для версии 1.1.0
         statistics = self._calculate_statistics(doc, tokens)
         
+        # Проверка грамматики
+        grammar_errors = check_grammar(doc, tokens)
+        
         return {
             "tokens": tokens,
             "sentences": sentences,
             "dependency_tree": dependency_tree,
-            "statistics": statistics
+            "statistics": statistics,
+            "grammar_errors": grammar_errors
         }
     
     def _extract_tokens(self, doc, options: Dict[str, Any]) -> List[Dict[str, Any]]:

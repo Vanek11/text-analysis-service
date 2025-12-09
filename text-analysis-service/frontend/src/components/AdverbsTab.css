@@ -1,0 +1,263 @@
+.adverbs-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.adverbs-header {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stats-summary {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4a90e2;
+}
+
+.adverbs-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 150px;
+}
+
+.filter-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.filter-select,
+.filter-input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.filter-input {
+  min-width: 200px;
+}
+
+.adverbs-table-container {
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.adverbs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.adverbs-table thead {
+  background: #f8f9fa;
+}
+
+.adverbs-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.adverbs-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.adverbs-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.token-text {
+  font-weight: 500;
+  color: #4a90e2;
+}
+
+.semantic-badge,
+.morphological-badge,
+.position-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.semantic-manner {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.semantic-time {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.semantic-place {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.semantic-frequency {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.semantic-degree {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.semantic-sentence {
+  background: #e0f2f1;
+  color: #00796b;
+}
+
+.morphological-simple {
+  background: #f5f5f5;
+  color: #616161;
+}
+
+.morphological-derived {
+  background: #e1bee7;
+  color: #7b1fa2;
+}
+
+.morphological-compound {
+  background: #b2ebf2;
+  color: #0097a7;
+}
+
+.morphological-phrasal {
+  background: #ffccbc;
+  color: #d84315;
+}
+
+.position-badge {
+  background: #fff9c4;
+  color: #f57f17;
+}
+
+.modifies-info {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.no-modifies {
+  font-size: 0.875rem;
+  color: #999;
+  font-style: italic;
+}
+
+.empty-state,
+.no-results {
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+}
+
+.adverbs-visualization-section {
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.adverbs-visualization-section h4 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.adverb-relations {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.adverb-relation-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.adverb-node,
+.modified-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 2px solid #4a90e2;
+  min-width: 120px;
+}
+
+.adverb-text,
+.modified-text {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.adverb-type,
+.modified-pos {
+  font-size: 0.75rem;
+  color: #666;
+  padding: 0.25rem 0.5rem;
+  background: #e3f2fd;
+  border-radius: 12px;
+}
+
+.relation-arrow {
+  font-size: 1.5rem;
+  color: #4a90e2;
+  font-weight: bold;
+}
+
+.no-relations {
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
