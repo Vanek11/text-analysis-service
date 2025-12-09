@@ -34,24 +34,45 @@ def analyze_tenses(doc, tokens: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     constructions = []
     sentences = list(doc.sents)
     
+    # Создаем словарь для быстрого доступа
+    tokens_dict = {t["id"]: t for t in tokens}
+    
     for sent in sentences:
         sent_verbs = [token for token in sent if token.pos_ == "VERB"]
         
         for verb in sent_verbs:
-            token_data = next((t for t in tokens if t["id"] == verb.i), None)
-            if not token_data or not token_data.get("grammar"):
+            token_data = tokens_dict.get(verb.i)
+            if not token_data:
                 continue
             
-            grammar = token_data["grammar"]
-            tense = grammar.get("tense")
-            aspect = grammar.get("aspect")
-            voice = grammar.get("voice")
+            grammar = token_data.get("grammar")
+            if not grammar:
+                # Пытаемся определить время напрямую из токена
+                tense = _infer_tense_from_token(verb, doc)
+                aspect = _infer_aspect_from_token(verb, doc)
+                voice = _infer_voice_from_token(verb, doc)
+                
+                if not tense:
+                    continue
+                
+                # Используем simple по умолчанию, если aspect не определен
+                if not aspect:
+                    aspect = "simple"
+            else:
+                tense = grammar.get("tense")
+                aspect = grammar.get("aspect")
+                voice = grammar.get("voice")
             
-            if not tense or not aspect:
+            # Если время все еще не определено, пропускаем
+            if not tense:
                 continue
+            
+            # Используем simple по умолчанию для aspect
+            if not aspect:
+                aspect = "simple"
             
             # Определяем полное название времени
-            tense_name = _get_full_tense_name(tense, aspect, voice)
+            tense_name = _get_full_tense_name(tense, aspect, voice or "active")
             
             constructions.append({
                 "type": "tense",
@@ -67,6 +88,75 @@ def analyze_tenses(doc, tokens: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             })
     
     return constructions
+
+
+def _infer_tense_from_token(token, doc) -> Optional[str]:
+    """
+    Определяет время напрямую из токена, если grammar не определена
+    """
+    tag = token.tag_
+    
+    # Прошедшее время
+    if tag in ["VBD", "VBN"]:
+        return "past"
+    # Настоящее время
+    elif tag in ["VBZ", "VBP", "VB"]:
+        return "present"
+    # Будущее время (модальные глаголы)
+    elif tag == "MD":
+        if token.lemma_.lower() in ["will", "shall"]:
+            return "future"
+        return "present"  # can, may, must - обычно настоящее
+    
+    # Проверяем вспомогательные глаголы для будущего времени
+    if token.lemma_.lower() in ["will", "shall"]:
+        return "future"
+    
+    return None
+
+
+def _infer_aspect_from_token(token, doc) -> Optional[str]:
+    """
+    Определяет вид напрямую из токена
+    """
+    tag = token.tag_
+    
+    # Progressive/Continuous
+    if tag == "VBG":
+        return "progressive"
+    
+    # Perfect
+    if tag == "VBN":
+        # Проверяем наличие have/has/had
+        for child in token.children:
+            if child.lemma_.lower() in ["have", "has", "had"]:
+                return "perfect"
+        # Если нет have, это может быть passive или past simple
+        return "simple"
+    
+    # Simple
+    if tag in ["VBD", "VBZ", "VBP", "VB"]:
+        return "simple"
+    
+    return None
+
+
+def _infer_voice_from_token(token, doc) -> Optional[str]:
+    """
+    Определяет залог напрямую из токена
+    """
+    # Проверяем наличие nsubjpass (пассивное подлежащее)
+    for child in token.children:
+        if child.dep_ == "nsubjpass":
+            return "passive"
+    
+    # Проверяем наличие be + VBN
+    if token.tag_ == "VBN":
+        for child in token.children:
+            if child.lemma_.lower() == "be" and child.dep_ in ["aux", "auxpass"]:
+                return "passive"
+    
+    return "active"
 
 
 def _get_full_tense_name(tense: str, aspect: str, voice: str) -> str:
